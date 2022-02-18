@@ -1,0 +1,241 @@
+I. УСТАНОВКА виртуальной машины и BONUS PART 1
+https://www.youtube.com/watch?v=j1FAZ0bUEvs
+https://www.youtube.com/watch?v=13YBlD0SOJo
+https://www.youtube.com/watch?v=2w-2MX5QrQw
+
+lsblk                                         \\ проверяем структуру разделов;
+sudo aa-status                                \\ cтатус AppArmor;
+
+подробнее oб AppArmor см. ->https://help.ubuntu.ru/wiki/%D1%80%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81
+%D1%82%D0%B2%D0%BE_%D0%BF%D0%BE_ubuntu_server/%D0%B1%D0%B5%D0%B7%D0%BE%D0%BF%D0%B0%D1%81%D0%BD%D0%BE%D1%81%D1%82%D1%8C/apparmor
+
+II. Установка apt и добавление пользователя(группы)
+Привелигированные команды root запускаются через sudo.
+
+su -                                          \\ перелючение на root;
+apt install sudo                              \\ установка пакетов sudo;
+или
+sudo apt update                               \\ обновление пакетов;
+dpkg -l | grep sudo                           \\ проверка успешной установки sudo;
+sudo addgroup user42                          \\ добавить группу;
+adduser <username> sudo\user                  \\ добавить пользователя в группу sudo или юзер;
+                                              \\ чтобы изменения вступили в силу нужно перезагрузить машину;
+reboot                                        \\ перезагрузка;
+getent group sudo/user                        \\ проверка, есть ли новый пользователь, getent - получить элементы из базы данных;
+sudo chage -l <username>                      \\ поддтверждение срока действия нового пароля для пользователя;
+sudo -v                                       \\ идентифицировать, sudo обновит временную метку пользователя; 
+deluser <user> <group>                        \\ удалить пользователя из группы;
+hostname                                      \\ узнать имя хоста;
+vim /etc/hostname                             \\ здесь записано имя хоста, можно его изменить и перезапустит систему(только для защиты!);
+
+III. Настройка sudo
+
+sudo vim /etc/sudoers.d/passwd	              \\ файл конфигурации судо (можно сначала прописать ls /etc/sudoers.d);
+								              \\ файл конфигурации - в нем хранятся настойки ОС или программы;
+                                              \\ файл sudoers содержит: псевдонимы (переменные) и определения пользователей (кто что может выполнять);
+подробнее o sudoers см. -> https://blog.sedicomm.com/2018/03/21/poleznye-nastrojki-sudoers-dlya-sudo-v-linux/
+Записать туда:
+Defaults	passwd_tries=3                    \\ кол-во попыток;
+Defaults	badpass_message="smth"            \\ сообщение об ошибке;
+Defaults	logfile="/var/log/sudo/sudo.log"  \\ записать все команды в файл sudo.log;
+Defaults    log_host, log_year, logfile="/var/log/sudo.log"
+			                                  \\ записать имя хоста и год использования sudo;
+Defaults	log_input,log_output              \\ параметры регистрируют все выводящиеся на экран входные и выходные данные польз. в /var/log/sudo ->
+Defaults	iolog_dir="/var/log/sudo"         \\ <- в этом каталоге храняться данные ввода-вывода;
+Defaults	requiretty                        \\ чтобы включить судо через TTY, через ввод(типо телетайп, система для использования терминала несколькими процессорами, для ввода);
+Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin" 
+                                              \\путь для команд sudo, разрешенных пользоватлям;
+подробнее o path см. -> https://ru.wikipedia.org/wiki/PATH_(%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D0%B0%D1%8F);
+подробнее o tty см. -> https://zalinux.ru/?p=4490
+sudo vim /var/log/sudo/sudo.log               \\ logfile - файл, содержащий информацию о командах sudo в хронологическом порядке;
+
+IV. SSH
+
+о ssh см. -> https://guides.hexlet.io/ssh/
+sudo apt install openssh-server               \\ установка openssh-server, это программа-сервер, обслуживающая запросы программы-клиента ssh;
+dpkg -l | grep ssh                            \\ проверка установки;
+sudo vim /etc/ssh/sshd_config                 \\ настройка ssh: подключаться через порт 4242 (создать порт перед этим в настройках VirtualBox
+                                                (Network -> Advanced -> Port Forwarding)), если не понятно, см. в разделе ->
+												2.5. Connecting SSH server:
+												https://baigal.medium.com/born2beroot-e6e26dfb50ac ,
+Здесь:
+1) заменить строку #Port 22
+на Port 4242;
+2) отключить вход по SSH в качестве root
+заменить строку #PermitRootLogin prohibit-password 
+на PermitRootLogin no
+РАСКОММЕНТИТЬ ЭТИ СТРОКИ!
+подробнее о sshd_config см. -> https://www.opennet.ru/man.shtml?topic=sshd_config&category=5&russian=0
+												
+sudo service ssh status                       \\ статус SSH;
+
+IV.1 ПОДКЛЮЧЕНИЕ К СЕРВЕРУ ЧЕРЕЗ SSH
+
+ssh user@127.0.0.1 -p 4242                    \\ присоединение к системе через терминал на том же компе;
+exit                                          \\ выход из системы;
+подробнее o 127.0.0.1 cм. -> https://lurkmore.to/127.0.0.1
+ 
+V. UFW
+
+o ufw cм. ->https://wiki.dieg.info/ufw 
+sudo apt install ufw                          \\ установка ufw;
+dpkg -l | grep ufw                            \\ проверка установки;
+sudo ufw enable                               \\ включить брандмауэр;
+sudo ufw allow 4242                           \\ разрешить подключения через порт 4242;
+sudo ufw status                               \\ статус UFW (активный\неактивный, показывает существующие порты);
+sudo ufw deny 8080                            \\ запретить порт;
+sudo ufw status numbered                      \\ отобразить номер порта (правила);
+sudo ufw delete <number>                      \\ удалить порт (правило) по номеру;
+sudo ufw delete allow <number>                \\ удалить порт (правило) по номеру  c v6;
+
+
+VI. Настройка правил пароля
+
+подробнее o настройке см.->https://itsecforu.ru/2019/02/18/%D0%BA%D0%B0%D0%BA-%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D0%BD%D0%B8%D1%
+82%D1%8C-%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D1%83-%D0%BD%D0%B0%D0%B4%D0%B5%D0%B6%D0%BD%D1%8B%D1%85-%D0%BF%D0%B0%D1%80%D0%BE/
+
+vim /etc/login.defs                           \\ файл политики истечения срока паролей;
+
+Здесь натйти и изменить строки на:
+160 PASS_MAX_DAYS   30                        \\ срок действия пароля 30 дней;
+161 PASS_MIN_DAYS   2                         \\ изменить пароль можно за 2 дня до истечения срока;
+162 PASS_WARN_AGE   7                         \\ уведомлять о конце срока за 7 дней;
+
+sudo apt install libpam-pwquality             \\ установить пакет libpam-pwquality, чтобы настроить политику паролей;
+dpkg -l | grep libpam-pwquality               \\ проверить установку;
+vim /etc/pam.d/common-password                \\ открыть файл политики паролей; 
+
+Здесь записать все это в одну строку
+после 
+password  requisite pam_pwquality.so:
+retry = 3                                     \\ запросить пользователя 3 раза ввести пароль, прежде чем вернуть ошибку;
+minlen = 10                                    \\ длина пароля не может быть меньше, чем этот параметр;
+maxrepeat = 3                                 \\ разрешить максимум 3 повторяющихся символа;
+ucredit = -1                                  \\ требуется хотя бы один заглавный символ;
+lcredit = -1                                  \\ должен иметь хотя бы один символ нижнего регистра;
+dcredit = -1                                  \\ должен иметь хотя бы одну цифру;
+difok=7                                       \\ разрешенные повторения строго пароля;
+reject_username                               \\ запретить username в качестве пароля;
+enforce_for_root                              \\ реализовать политику в корневом каталоге;
+
+passwd                                        \\ изменить пароль;
+
+V. Скрипт и cron 
+
+подробнее o cron см.->https://winitpro.ru/index.php/2020/04/21/planirovshhik-zadach-cron-v-linux/
+
+vim /usr/local/bin/monitoring.sh              \\ создаем скрипт;
+sudo crontab -u root -e                       \\ установка;
+sudo crontab -u root -l                       \\ cat;
+sudo crontab -l                               \\ тоже самое;
+
+shasum <name> > signature.txt                 \\ сборка подписи виртуального диска (нужно перейти в папку с проектом);
+
+VI. BONUS PART 2 Linux Lighttpd MariaDB PHP 
+
+подробнее o Lighttpd см.->https://ru.wikipedia.org/wiki/Lighttpd
+
+Установка Lighttpd (веб-сервер, свободное программное обеспечение, работающее в линукс)
+
+sudo apt install lighttpd                     \\ установка lighttpd;
+dpkg -l | grep lighttpd                       \\ проверка;
+sudo ufw allow 80                             \\ разрешить входящте подключения через порт 80;
+                                              \\ перед эти создать порт в Network;
+Настройка Lighttpd
+
+Включить модули:
+sudo lighty-enable-mod fastcgi 
+sudo lighty-enable-mod fastcgi-php 
+sudo service lighttpd force-reload 
+
+MariaDB
+
+СУБД (система управления базами данных) у каждой такой системы свой язык, с помощью которой он этими данными управляет(создает, удалает и проч)
+
+
+подробнее o MariaDB см.->https://www.dmosk.ru/terminus.php?object=mariadb
+
+sudo apt install mariadb-server               \\ установка пакета mariadb;
+dpkg -l | grep mariadb-server                 \\ проверка;
+sudo mysql_secure_installation                \\ запустить скрипт и удалить небезопасные настройки;
+sudo mariadb                                  \\ подключится к mariadb;
+CREATE DATABASE <database-name>;              \\ создание базы данных;
+GRANT ALL ON <database-name>.* TO '<username-2>'@'localhost' IDENTIFIED BY '<password-2>' WITH GRANT OPTION; 
+                                              \\ создать нового польз.,
+                                                и предоставление ему права доступа к базе;
+FLUSH PRIVILEGES;                             \\ сбросить привилегии;
+exit                                          \\ выход из оболочки mariadb;
+mariadb -u <username-2> -p                    \\ проверка наличия нового пользователя;
+SHOW DATABASES;                               \\ проверка, есть ли у нового пользователя доступ к базе данных;
++--------------------+
+| Database           |
++--------------------+
+| <database-name>    |
+| information_schema |
++--------------------+
+
+PHP 
+
+sudo apt install php-cgi php-mysql            \\ установка php-cgi и php-mysql;
+dpkg -l | grep php                            \\ проверка;
+sudo apt install wget                         \\ установка wget;
+sudo wget http://wordpress.org/latest.tar.gz -P /var/www/html  
+                                              \\ загрузить /var/www/html;
+sudo tar -xzvf /var/www/html/latest.tar.gz    \\ извлечь загруженный контент;
+sudo rm /var/www/html/latest.tar.gz
+sudo cp -r /var/www/html/wordpress/* /var/www/html
+                                              \\ копировать содержимое /var/www/html/wordpressв /var/www/html;
+sudo rm -rf /var/www/html/wordpress           \\ удалить;
+sudo cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+                                              \\ создать файл конфигурации WordPress;
+sudo vim /var/www/html/wp-config.php          \\ настроить;
+
+Заменить строки:
+23 define( 'DB_NAME', '<database-name>' );
+26 define( 'DB_USER', '<username-2>' );
+29 define( 'DB_PASSWORD', '<password-2>' );
+
+FTP
+
+ftp протокол (правило) передачи файлов от одного комьютера к другому. Именно файлов, а не ссылок как в http. 
+
+sudo apt install vsftpd                       \\ установка FTP;
+dpkg -l | grep vsftpd                         \\ проверка установки;
+sudo ufw allow 21                             \\ подключить порт;
+sudo vim /etc/vsftpd.conf                     \\ настройка конфигурации;
+
+подробнее o vsftpd.conf см.->https://www.opennet.ru/base/net/vsftpd_overview.txt.html
+
+Здесь:
+1) раскомментить:
+write_enable=YES
+chroot_local_user=YES                         \\ запретить ftp пользователю операции вне корневого каталога;
+2) Добавить в конец, чтобы подключить корневой каталог для FTP:
+user_sub_token=$USER     
+local_root=/home/$USER/ftp
+
+Далее набрать команды:
+sudo mkdir /home/<username>/ftp               \\
+sudo mkdir /home/<username>/ftp/files         \\
+sudo chown nobody:nogroup /home/<username>/ftp\\ предоставить возможность владельцу:группе распоряжаться директорией;
+о команде chown->https://www.hostinger.ru/rukovodstva/komanda-chown-linux
+sudo chmod a-w /home/<username>/ftp           \\ запретить доступ к директории;
+
+sudo vim /etc/vsftpd.userlist                 \\ файл списка пользователей
+echo <username> | sudo tee -a /etc/vsftpd.userlist  \\команда tee читает стандартный ввод и записывает его как в стандартный вывод, так и в один или несколько файлов
+
+3) Еще довавить это в vsftpd.conf:
+userlist_enable=YES                           \\ для предотвращения передачи пустого поля в качестве пароля;
+userlist_file=/etc/vsftpd.userlist            \\ параметр указывает путь к файлу списка пользователей;
+userlist_deny=NO                              \\ вход пользователей будет отклонен если они не найдены в файле указанном usrlist_file;
+
+Подключение через FTP
+
+
+ftp <ip-address>
+by                                            \\ выход из ftp;
+
+В помощь:
+https://github.com/hanshazairi/42-born2beroot#setting-up-a-cron-job
+https://baigal.medium.com/born2beroot-e6e26dfb50ac
+https://github.com/a-parfenov/Born2beRoot

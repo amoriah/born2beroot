@@ -1,0 +1,49 @@
+что такое виртуалбокс
+чем интересен виртуалбокс
+выбор OC
+отличие дебиан от центос
+разница в апт и аптитуд
+чтоlsblk
+
+
+проверить статус ссш                                                 sudo service ssh status 
+проверить статус ювдабл                                              sudo service ufw status
+проверитть, что операционка действительно дебиан                     sudo uname -a
+
+проверить что amoriah есть в группах                                 sudo getent group sudo/user42
+создать новую группу                                                 sudo addgroup group2
+создать нового пользователя                                          sudo adduser username
+добавить нового пользователя в группу                                sudo adduser username group2
+настройки пароля  1) vim /etc/login.defs                             файл политики истечения срока паролей;
+                 2) vim /etc/pam.d/common-password                   файл политики паролей; 
+\\удалить пользователя из группы                                       deluser user group
+\\удалить пользователя                                                 deluser username
+
+проверить хостнэйм amoriah42                                         hostname
+изменить имя хоста                                                   hostnamectl set-hostname <name>
+отредактировать имя в файле                                          vim /etc/hostname
+
+проверяем структуру разделов                                         lsblk  
+что такое LVM                                                        
+
+настройки sudoers                                                    sudo vim /etc/sudoers.d/passwd
+логфайл судо                                                         sudo vim /var/log/sudo/sudo.log
+
+что такое ufw                                                        брэндмауэр
+убедиться что работает                                               sudo service ufw status
+подтвердить подключение через порт 4242                              ufw status
+подключить порт 8080(сначала создать)                                ufw allow 8080
+запретить порт                                                      sudo ufw deny 8080                            
+отобразить номер порта (правила)                                    sudo ufw status numbered                      
+удалить порт (правило) по номеру                                    sudo ufw delete <number>                      
+удалить порт (правило) по номеру  c v6                               sudo ufw delete allow <number>                
+
+
+что такое ssh
+файл конфигурации                                                 sudo vim /etc/ssh/sshd_config
+попробовать войти через нового нользователя и рута 
+                                                                     sudo service ssh status 
+
+что такое cron                                                  cron — классический демон, сценарий, использующийся для периодического выполнения заданий в определённое время. 
+vim /usr/local/bin/monitoring.sh 
+запускать каждые 30 сек                                         sudo crontab -u root -e 
