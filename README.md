@@ -1,5 +1,5 @@
 # born2beroot
-This is project for SCHOOL 21. Read the mission in Russian in subj.txt. 
+This is project for Ecole 42. Read the mission in Russian in subj.txt. 
 
 In file course of action.txt contains all commands which I used.
 
